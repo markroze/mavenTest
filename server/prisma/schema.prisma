@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  gender      String
+  profile     Json
+  gameResults GameResults[]
+}
+
+model GameResults {
+  id     Int   @id @default(autoincrement())
+  user   User  @relation(fields: [userId], references: [id])
+  userId Int
+  score  Float
+
+  @@index([userId])
+}
+
+// https://randomuser.me/api/?gender=female
