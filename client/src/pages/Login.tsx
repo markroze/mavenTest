@@ -1,8 +1,6 @@
 import React from 'react';
-
-import './App.css';
 import axios from 'axios';
-import { apiUrl } from './App';
+import { apiUrl } from '../App';
 
 interface LoginProps {
   setLocalName: (name: string) => void;
