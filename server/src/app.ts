@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 export const app: Application = express();
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
+import cors from 'cors';
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,7 @@ const host = 'http://localhost';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 interface UserGenderResData {
   count: number;
@@ -29,7 +31,7 @@ app.post('/login', async (req, res) => {
     });
 
     if (user) {
-      res.status(200).json({ user });
+      res.status(200).json({ username: user.name });
     } else {
       const userGenderRes = await axios.get(
         `https://api.genderize.io/?name=${username}`
@@ -51,17 +53,19 @@ app.post('/login', async (req, res) => {
         },
       });
 
-      res.status(200).json({ newUser });
+      res.status(200).json({ username: newUser.name });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error });
   }
 });
 
 app.post('/addResult', async (req, res) => {
   const { username, score } = req.body;
-
+  if (!username || !score) {
+    res.status(400).json({ message: 'Missing username or score' });
+  }
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -82,7 +86,7 @@ app.post('/addResult', async (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error });
   }
 });
@@ -104,7 +108,7 @@ app.get('/leaderboard', async (req, res) => {
 
     res.status(200).json({ leaderboard });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error });
   }
 });
